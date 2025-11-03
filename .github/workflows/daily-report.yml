@@ -22,7 +22,7 @@ jobs:
     - name: 📦 Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pandas openpyxl pymongo requests
+        pip install -r requirements.txt
 
     - name: ▶️ Run daily report script
       env:
