@@ -147,8 +147,7 @@ def summarize_team_tasks(tasks_list, max_points=5):
 def generate_excel_by_team(data):
     team_tasks = defaultdict(list)
     for record in data:
-        team = record.get("team", "").strip().lower()
-        dept = record.get("department", "").strip().lower()
+        team = record.get("team", "").strip()
         tasks = record.get("tasks", []) or []
         for t in tasks:
             if isinstance(t, dict):
@@ -156,7 +155,7 @@ def generate_excel_by_team(data):
             else:
                 details = str(t).strip()
             if details:
-                team_tasks[(dept, team)].append(details)
+                team_tasks[team].append(details)
 
     wb = openpyxl.load_workbook(TEMPLATE_FILE)
     ws = wb.active
@@ -166,14 +165,11 @@ def generate_excel_by_team(data):
         title_cell.value = str(title_cell.value).replace("DD|MM|YYYY", datetime.now().strftime("%d-%b-%Y"))
 
     for row in range(6, ws.max_row + 1):
-        dept_cell = ws[f"A{row}"]
         team_cell = ws[f"B{row}"]
-        dept_name = str(dept_cell.value).strip().lower() if dept_cell.value else ""
-        team_name = str(team_cell.value).strip().lower() if team_cell.value else ""
-
-        if dept_name and team_name and (dept_name, team_name) in team_tasks:
-            tasks_for_team = team_tasks[(dept_name, team_name)]
-            print(f"[INFO] Summarizing team '{team_name}' in department '{dept_name}' with {len(tasks_for_team)} tasks.")
+        team_name = str(team_cell.value).strip() if team_cell.value else ""
+        if team_name and team_name in team_tasks:
+            tasks_for_team = team_tasks[team_name]
+            print(f"[INFO] Summarizing team '{team_name}' with {len(tasks_for_team)} tasks.")
             summary_text = summarize_team_tasks(tasks_for_team, max_points=5)
             cell = ws[f"G{row}"]
             cell.value = summary_text
